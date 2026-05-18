@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "AATQ: Activation-Aware Ternary Quantization"
+authors:
+  - family-names: "Jia"
+    given-names: "Zhenhua"
+version: "0.1.0"
+date-released: "2026-05-14"
+url: "https://github.com/maomao/aatq"
+preferred-citation:
+  type: article
+  title: "Why Does Layer-Wise Ternary PTQ Fail on Qwen2.5-7B? An Activation-Aware Approach"
+  authors:
+    - family-names: "Jia"
+      given-names: "Zhenhua"
+  year: 2026
+  journal: "arXiv preprint"

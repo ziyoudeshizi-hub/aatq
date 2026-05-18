@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+*.pt
+*.bin
+models_local/
+models_eval/
+results_7b/
+nul
+debug_output.txt
+quick_test_output.txt
+phase1_fix_output.txt
+.claude/

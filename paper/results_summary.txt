@@ -1,0 +1,56 @@
+# AATQ Experimental Results Summary
+# Date: 2026-05-11
+# All experiments done on RTX 3070 Laptop 8GB VRAM
+
+## FP16 Baselines
+| Model | ARC-E | ARC-C | BoolQ | HellaSwag | PIQA | WinoGrande | Avg |
+|-------|-------|-------|-------|-----------|------|------------|-----|
+| TinyLlama-1.1B | 61.8 | 30.8 | 61.7 | 46.5 | 74.3 | 60.1 | 55.9 |
+| Qwen2.5-0.5B | 64.6 | 29.5 | 62.3 | 40.6 | 70.0 | 56.3 | 53.9 |
+
+## Ternary Results (all ~random chance)
+| Config | ARC-E | ARC-C | BoolQ | HellaSwag | PIQA | WinoGrande | Avg | Best Loss |
+|--------|-------|-------|-------|-----------|------|------------|-----|-----------|
+| TinyLlama gs128 lr=0.02 300st | 25.3 | 22.1 | 37.8 | 25.6 | 52.4 | 50.4 | 35.6 | 6.215 |
+| TinyLlama gs128 lr=0.005 1000st | 24.2 | 20.8 | 37.8 | 25.5 | 52.3 | 50.0 | 35.1 | 5.707 |
+| Qwen gs128 full | 25.9 | 23.6 | 37.8 | 25.8 | 52.6 | 49.3 | 35.8 | 3.169 |
+| Qwen gs128 skip2 | 26.8 | 23.3 | 37.8 | 25.6 | 53.2 | 49.2 | 36.0 | 3.903 |
+| Qwen gs128 KD | 28.3 | 20.3 | 37.8 | 26.1 | 54.4 | 50.7 | 36.2 | 77.7* |
+| Qwen gs32 KD | 28.2 | 20.1 | 37.8 | 26.0 | 54.2 | 50.2 | 36.1 | 71.0* |
+
+*KD loss uses different scale (includes KL divergence term)
+
+## Random Chance Baselines (theoretical)
+| Task | Choices | Random Acc |
+|------|---------|-----------|
+| ARC-Easy | 4 | 25.0% |
+| ARC-Challenge | 4 | 25.0% |
+| BoolQ | 2 | 50.0% (biased: 37.8%) |
+| HellaSwag | 4 | 25.0% |
+| PIQA | 2 | 50.0% |
+| WinoGrande | 2 | 50.0% |
+| Average | - | ~37.5% (unbiased) |
+
+## Key Finding
+All ternary configurations converge to 35.1-36.2% average accuracy,
+which matches the random-chance baseline when accounting for model biases.
+This is INDEPENDENT of:
+- Model architecture (TinyLlama 1.1B vs Qwen 0.5B)
+- Learning rate (0.02, 0.005, 0.0005)
+- Training steps (300, 500, 1000)
+- Selective quantization (skip first/last 2 layers)
+- Knowledge distillation (T=2, alpha=0.9)
+- Group size (128 vs 32, i.e., 4x more parameters)
+
+## Training Hyperparameters
+- Calibration: 128 sequences x 128 tokens from C4
+- Optimizer: Adam (beta1=0.9, beta2=0.99, eps=1e-4)
+- Gradient clipping: max_norm=1.0
+- Tau schedule: cosine from 1.0 to 0.25
+- Warmup: 20 steps linear
+- Best-state checkpointing: always restores best loss state
+
+## Conclusion
+Post-training ternary quantization fundamentally fails on sub-1.5B models.
+The information bottleneck (1.58 bpw) is too aggressive to preserve
+discriminative reasoning capabilities at this model scale.
